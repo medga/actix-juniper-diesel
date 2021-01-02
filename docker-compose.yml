@@ -1,0 +1,13 @@
+version: '3.8'
+services: 
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db:/var/lib/postgresql/data
+ d
+    environment:
+      POSTGRES_USER: medga
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: actix_db

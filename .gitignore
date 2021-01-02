@@ -1,0 +1,5 @@
+.vscode
+.env
+/db/*
+/target
+Cargo.lock

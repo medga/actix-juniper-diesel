@@ -23,13 +23,16 @@ impl QueryRoot {
         Ok(UserType::from(user))
     }
 
-    // #[graphql(description = "List of all users")]
-    // fn users(context: &Context) -> FieldResult<Vec<User>> {
-    //     let connection = &context.conn.get()?;
-    //     let users = User::get_users(connection)?;
-
-    //     Ok(users)
-    // }
+    #[graphql(description = "List of all users")]
+    fn users(context: &Context) -> FieldResult<Vec<UserType>> {
+        let connection = &context.conn.get()?;
+        let users = User::get_users(connection)?;
+        let retult = users.into_iter().map(|user| {
+            UserType::from(user)
+        }).collect();
+        
+        Ok(retult)
+    }
 }
 
 pub struct MutationRoot;

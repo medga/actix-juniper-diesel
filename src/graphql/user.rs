@@ -1,6 +1,6 @@
-use juniper::{GraphQLInputObject};
 use crate::graphql::root::Context;
 use crate::repository::user::User as UserModel;
+use juniper::GraphQLInputObject;
 
 pub struct User {
     id: i32,
@@ -33,13 +33,26 @@ impl User {
 
 impl From<UserModel> for User {
     fn from(user: UserModel) -> Self {
-        User { 
+        let created_at: String;
+        let updated_at: String;
+        if user.created_at.is_some() {
+            created_at = user.created_at.unwrap().format("%Y-%m-%d %T").to_string();
+        } else {
+            created_at = "".to_string();
+        }
+        if user.updated_at.is_some() {
+            updated_at = user.updated_at.unwrap().format("%Y-%m-%d %T").to_string();
+        }
+        else {
+            updated_at = "".to_string();
+        }
+        User {
             id: user.id,
             name: user.name,
             email: user.email,
-            created_at: user.created_at.unwrap().format("%Y-%m-%d %T").to_string(),
-            updated_at: user.updated_at.unwrap().format("%Y-%m-%d %T").to_string(),
-         }
+            created_at: created_at,
+            updated_at: updated_at,
+        }
     }
 }
 

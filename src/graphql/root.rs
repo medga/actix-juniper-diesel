@@ -1,41 +1,51 @@
-use juniper::{graphql_object, EmptySubscription, RootNode};
+use juniper::{EmptySubscription, FieldResult, RootNode};
+use std::sync::Arc;
 
-pub struct Context {}
+use crate::db::DbPool;
+use crate::repository::user::*;
+use crate::graphql::user::User as UserType;
+
+pub struct Context {
+    pub conn: Arc<DbPool>,
+}
 
 impl juniper::Context for Context {}
 
 pub struct QueryRoot;
 
-#[derive(Clone, Debug)]
-struct User {
-    id: i32,
-}
-
-#[graphql_object(context = Context)]
-impl User {
-    fn id(&self) -> i32 {
-        self.id
-    }
-}
-
-#[graphql_object(Context = Context)]
+#[juniper::graphql_object(context = Context)]
 impl QueryRoot {
-    async fn user() -> Vec<User> {
-        vec![User { id: 1 }]
+    #[graphql(description = "Get the user by id")]
+    async fn user(context: &Context) -> FieldResult<UserType> {
+        let connection = &context.conn.get()?;
+        let user = User::get_user(connection)?;
+
+        Ok(UserType::from(user))
     }
+
+    // #[graphql(description = "List of all users")]
+    // fn users(context: &Context) -> FieldResult<Vec<User>> {
+    //     let connection = &context.conn.get()?;
+    //     let users = User::get_users(connection)?;
+
+    //     Ok(users)
+    // }
 }
 
 pub struct MutationRoot;
 
-#[graphql_object(Context = Context)]
+#[juniper::graphql_object(context = Context)]
 impl MutationRoot {
-    async fn create_user() -> Vec<User> {
-        vec![User { id: 1 }]
+    async fn create_user(context: &Context,) -> FieldResult<UserType> {
+        let connection = &context.conn.get()?;
+        let user = User::get_user(connection)?;
+        
+        Ok(UserType::from(user))
     }
 }
 
 pub type Schema = RootNode<'static, QueryRoot, MutationRoot, EmptySubscription<Context>>;
 
 pub fn create_schema() -> Schema {
-    Schema::new(QueryRoot, MutationRoot, EmptySubscription::<Context>::new())
+    Schema::new(QueryRoot {}, MutationRoot {}, EmptySubscription::new())
 }

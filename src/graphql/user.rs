@@ -1,6 +1,9 @@
+use juniper::GraphQLInputObject;
+use serde::Deserialize;
+use validator::{Validate, ValidationError};
+
 use crate::graphql::root::Context;
 use crate::repository::user::User as UserModel;
-use juniper::GraphQLInputObject;
 
 pub struct User {
     id: i32,
@@ -42,8 +45,7 @@ impl From<UserModel> for User {
         }
         if user.updated_at.is_some() {
             updated_at = user.updated_at.unwrap().format("%Y-%m-%d %T").to_string();
-        }
-        else {
+        } else {
             updated_at = "".to_string();
         }
         User {
@@ -56,10 +58,23 @@ impl From<UserModel> for User {
     }
 }
 
-#[derive(GraphQLInputObject)]
-#[graphql(description = "New thermostat status")]
+#[graphql(description = "New user")]
+#[derive(GraphQLInputObject, Validate, Deserialize)]
 pub struct NewUser {
-    name: String,
-    email: String,
-    password: String,
+    #[validate(length(min = 2))]
+    pub name: String,
+    #[validate(email, custom = "validate_unique_email")]
+    pub email: String,
+    #[validate(length(min = 6))]
+    pub password: String,
 }
+
+fn validate_unique_email(email: &str) -> Result<(), ValidationError> {
+    if email == "email" {
+        // the value of the username will automatically be added later
+        return Err(ValidationError::new("terrible_username"));
+    }
+
+    Ok(())
+}
+

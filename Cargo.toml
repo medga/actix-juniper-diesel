@@ -12,6 +12,7 @@ path = "src/lib.rs"
 actix-web="3"
 dotenv = "0"
 chrono = "0"
+    validator = { version = "0.12", features = ["derive"] }
 
 #log
 env_logger = "0"

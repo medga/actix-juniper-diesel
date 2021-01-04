@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use crate::db::DbPool;
 use crate::repository::user::*;
-use crate::graphql::user::User as UserType;
+use crate::graphql::user::{User as UserType,NewUser as UserInput };
 
 pub struct Context {
     pub conn: Arc<DbPool>,
@@ -39,9 +39,9 @@ pub struct MutationRoot;
 
 #[juniper::graphql_object(context = Context)]
 impl MutationRoot {
-    async fn create_user(context: &Context,) -> FieldResult<UserType> {
+    async fn create_user(context: &Context, data: UserInput) -> FieldResult<UserType> {
         let connection = &context.conn.get()?;
-        let user = User::get_user(connection)?;
+        let user = User::insert(connection, NewUser::from(data))?;
         
         Ok(UserType::from(user))
     }

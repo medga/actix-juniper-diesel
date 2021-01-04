@@ -1,6 +1,7 @@
+use crate::schema::users;
+use crate::graphql::user::NewUser as NewUserGraph;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use crate::schema::users;
 
 #[derive(Queryable, Clone)]
 pub struct User {
@@ -19,8 +20,23 @@ pub struct NewUser {
     email: String,
     password: String,
 }
+impl From<NewUserGraph> for NewUser {
+    fn from(user: NewUserGraph) -> Self {
+        NewUser {
+            name: user.name,
+            email: user.email,
+            password: user.password
+        }
+    }
+}
 
 impl User {
+    pub fn check_email_unique(connection: &PgConnection, _email: String) -> bool {
+        use crate::schema::users::dsl::*;
+        use diesel::dsl::*;
+
+        users.filter(email.eq(_email)).select(count_star()).first(connection) == Ok(0)
+    }
     pub fn get_user(connection: &PgConnection) -> QueryResult<User> {
         use crate::schema::users::dsl::*;
 
@@ -33,9 +49,17 @@ impl User {
         users.limit(10).load::<User>(connection)
     }
 
-    pub fn insert(connection: &PgConnection, data: NewUser) -> QueryResult<usize> {
+    pub fn insert(connection: &PgConnection, data: NewUser) -> QueryResult<User> {
         diesel::insert_into(users::table)
             .values(&data)
-            .execute(connection)
+            .execute(connection).expect("Can not create user!");
+
+        User::get_last(connection)
+    }
+
+    fn get_last(connection: &PgConnection) -> QueryResult<User> {
+        use crate::schema::users::dsl::*;
+
+        users.order(id.desc()).limit(1).get_result(connection)
     }
 }

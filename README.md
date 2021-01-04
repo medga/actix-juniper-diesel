@@ -14,7 +14,7 @@ GraphQL library | [Juniper](https://github.com/graphql-rust/juniper)
 ```bash
 # Fetch the repo
 git clone https://github.com/medga/actix-juniper-diesel
-cd actix-juniper-postgres
+cd actix-juniper-diesel
 
 diesel setup
 diesel migration run

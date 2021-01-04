@@ -16,6 +16,8 @@ GraphQL library | [Juniper](https://github.com/graphql-rust/juniper)
 git clone https://github.com/medga/actix-juniper-diesel
 cd actix-juniper-diesel
 
+mv .env.example .env
+
 diesel setup
 diesel migration run
 
